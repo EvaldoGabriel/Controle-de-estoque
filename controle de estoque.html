@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Controle de Estoque</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: Arial, sans-serif; }
+    body { background: #0f172a; color: #e5e7eb; padding: 20px; }
+    h1 { text-align: center; margin-bottom: 20px; }
+    .container { max-width: 900px; margin: auto; background: #020617; padding: 20px; border-radius: 12px; }
+    form { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 20px; }
+    input, button { padding: 10px; border-radius: 6px; border: none; }
+    input { background: #020617; color: #e5e7eb; border: 1px solid #334155; }
+    button { background: #2563eb; color: #fff; cursor: pointer; }
+    button:hover { background: #1d4ed8; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { padding: 10px; border-bottom: 1px solid #334155; text-align: center; }
+    th { background: #020617; }
+    .actions button { background: #dc2626; }
+    .actions button:hover { background: #b91c1c; }
+    @media (max-width: 700px) {
+      form { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <h1>📦 Controle de Estoque</h1>
+  <div class="container">
+    <form id="productForm">
+      <input type="text" id="name" placeholder="Produto" required />
+      <input type="number" id="quantity" placeholder="Quantidade" required />
+      <input type="number" id="price" placeholder="Preço (R$)" required />
+      <button type="submit">Adicionar</button>
+    </form>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Produto</th>
+          <th>Quantidade</th>
+          <th>Preço</th>
+          <th>Total</th>
+          <th>Ações</th>
+        </tr>
+      </thead>
+      <tbody id="productList"></tbody>
+    </table>
+  </div>
+
+  <script>
+    const form = document.getElementById('productForm');
+    const productList = document.getElementById('productList');
+    let products = JSON.parse(localStorage.getItem('products')) || [];
+
+    function saveProducts() {
+      localStorage.setItem('products', JSON.stringify(products));
+    }
+
+    function renderProducts() {
+      productList.innerHTML = '';
+      products.forEach((product, index) => {
+        const row = document.createElement('tr');
+        row.innerHTML = `
+          <td>${product.name}</td>
+          <td>${product.quantity}</td>
+          <td>R$ ${product.price.toFixed(2)}</td>
+          <td>R$ ${(product.quantity * product.price).toFixed(2)}</td>
+          <td class="actions"><button onclick="removeProduct(${index})">Excluir</button></td>
+        `;
+        productList.appendChild(row);
+      });
+    }
+
+    form.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const name = document.getElementById('name').value;
+      const quantity = Number(document.getElementById('quantity').value);
+      const price = Number(document.getElementById('price').value);
+
+      products.push({ name, quantity, price });
+      saveProducts();
+      renderProducts();
+      form.reset();
+    });
+
+    function removeProduct(index) {
+      products.splice(index, 1);
+      saveProducts();
+      renderProducts();
+    }
+
+    renderProducts();
+  </script>
+</body>
+</html>
